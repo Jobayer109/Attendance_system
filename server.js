@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
+const bcrypt = require("bcrypt");
 const connectDB = require("./db");
 const User = require("./models/User");
 
@@ -8,22 +9,27 @@ const User = require("./models/User");
 app.use(express.json());
 
 // Home page
-app.get("/", (_req, res) => {
-  res.send("Server is running");
+app.get("/", (req, res) => {
+  res.status(200).send("<h1>Server is running</h1>");
 });
 
 // Register
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "Invalid data" });
-  }
+  // if (!name || !email || !password) {
+  //   return res.status(400).json({ message: "Invalid data" });
+  // }
 
   let user = await User.findOne({ email });
   if (user) {
     return res.status(400).json({ message: "User already exist" });
   }
   user = new User({ name, email, password });
+
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(password, salt);
+  user.password = hash;
+
   await user.save();
   res.status(201).send({ message: "User created successfully", user });
 });
@@ -32,6 +38,6 @@ app.post("/register", async (req, res) => {
 connectDB("mongodb://127.0.0.1:27017/Attendance-DB").then(() => {
   console.log("Database connected");
   app.listen(port, () => {
-    console.log(`Server is running on port: https://localhost:${port}`);
+    console.log(`Server is running on port: http://localhost:${port}`);
   });
 });
