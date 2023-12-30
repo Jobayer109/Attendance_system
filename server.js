@@ -14,24 +14,30 @@ app.get("/", (req, res) => {
 });
 
 // Register
-app.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
-  // if (!name || !email || !password) {
-  //   return res.status(400).json({ message: "Invalid data" });
-  // }
+app.post("/register", async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ message: "User already exist" });
+    }
+    user = new User({ name, email, password });
 
-  let user = await User.findOne({ email });
-  if (user) {
-    return res.status(400).json({ message: "User already exist" });
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    user.password = hash;
+
+    await user.save();
+    res.status(201).send({ message: "User created successfully", user });
+  } catch (e) {
+    next(e);
   }
-  user = new User({ name, email, password });
+});
 
-  const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(password, salt);
-  user.password = hash;
-
-  await user.save();
-  res.status(201).send({ message: "User created successfully", user });
+// Global error handling
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(500).send({ message: "Server error occurred" });
 });
 
 // Database connection
