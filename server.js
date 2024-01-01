@@ -4,6 +4,7 @@ const port = process.env.PORT || 3000;
 const bcrypt = require("bcrypt");
 const connectDB = require("./db");
 const User = require("./models/User");
+const jwt = require("jsonwebtoken");
 
 // Middlewares
 app.use(express.json());
@@ -14,7 +15,7 @@ app.get("/", (req, res) => {
 });
 
 // Register
-app.post("/register", async (req, res, next) => {
+app.post("/api/v1/auth/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
     let user = await User.findOne({ email });
@@ -35,7 +36,7 @@ app.post("/register", async (req, res, next) => {
 });
 
 // Login
-app.post("/login", async (req, res, next) => {
+app.post("/api/v1/auth/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -48,11 +49,37 @@ app.post("/login", async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).send({ message: "Invalid credential" });
     }
-
     delete user._doc.password;
-    res.status(200).json({ message: "Login successful", user });
+
+    // JWT Generate
+
+    const token = jwt.sign(user._doc, "Secret-key", { expiresIn: "1h" });
+
+    res.status(200).json({ message: "Login successful", token, user });
   } catch (err) {
     next(err);
+  }
+});
+
+// Private route
+app.get("/api/v1/private", async (req, res) => {
+  try {
+    let token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(400).json({ message: "Unauthorized Access" });
+    }
+
+    token = token.split(" ")[1];
+    const decoded = await jwt.verify(token, "Secret-key");
+    const user = await User.findById(decoded._id);
+
+    if (!user) {
+      return res.status(400).json({ message: "Unauthorized Access" });
+    }
+    return res.status(200).json({ message: "This is private route" });
+  } catch (err) {
+    res.status(400).json(err.message);
   }
 });
 
