@@ -11,7 +11,9 @@ app.use(routes);
 // Global error handling
 app.use((err, req, res, next) => {
   console.log(err);
-  res.status(500).send({ message: "Server error occurred" });
+  const message = err.message ? err.message : "Server error occurred";
+  const status = err.status ? err.status : 500;
+  res.status(status).send(message);
 });
 
 // Database connection

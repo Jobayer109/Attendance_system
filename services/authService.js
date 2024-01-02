@@ -1,14 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { findUserByProperty, createNewUser } = require("./userService");
+const error = require("../utils/error");
 
 const registerService = async ({ name, email, password }) => {
   let user = await findUserByProperty("email", email);
-  if (user) {
-    const error = new Error("User already exist");
-    error.status = 400;
-    throw error;
-  }
+  if (user) throw error("User already exist", 400);
+
   // password hashing and create new user.
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
@@ -17,19 +15,11 @@ const registerService = async ({ name, email, password }) => {
 
 const loginService = async ({ email, password }) => {
   const user = await findUserByProperty("email", email);
-  if (!user) {
-    const error = new Error("Invalid email");
-    error.status = 400;
-    throw error;
-  }
+  if (!user) throw error("Invalid email", 400);
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    const error = new Error("Invalid password");
-    error.status = 400;
-    throw error;
-  }
-  // const { _id, name, email, password, roles, accountStatus } = user;
+  if (!isMatch) throw error("Invalid password", 400);
+
   const payload = {
     _id: user._id,
     name: user.name,
