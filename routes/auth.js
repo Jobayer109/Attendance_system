@@ -4,7 +4,7 @@ const {
   loginController,
   homeController,
   privateController,
-} = require("../controllers/auth");
+} = require("../controllers/authControl");
 const authenticate = require("../middlewares/authenticate");
 
 router.get("/", homeController);
