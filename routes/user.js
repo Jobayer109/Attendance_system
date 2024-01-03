@@ -1,10 +1,12 @@
+const userController = require("../controllers/userController");
+
 const router = require("express").Router();
 
 // Get user by ID
 router.get("/:userId", () => {});
 
 // Get all users
-router.get("/", () => {});
+router.get("/", userController.getUsers);
 
 // Create new user
 router.post("/", () => {});
