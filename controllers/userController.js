@@ -1,6 +1,7 @@
 const { findUsers, findUserByProperty } = require("../services/userService");
+const authService = require("../services/authService");
 const error = require("../utils/error");
-
+// Get all users
 const getUsers = async (req, res, next) => {
   try {
     const users = await findUsers();
@@ -10,6 +11,7 @@ const getUsers = async (req, res, next) => {
   }
 };
 
+// Get a single user by it's id.
 const getUserByID = async (req, res, next) => {
   const userId = req.params.userId;
 
@@ -24,7 +26,22 @@ const getUserByID = async (req, res, next) => {
   }
 };
 
-const postUser = () => {};
+// Create user.
+const postUser = async (req, res, next) => {
+  const { name, email, password, roles, accountStatus } = req.body;
+  try {
+    const user = await authService.registerService({
+      name,
+      email,
+      password,
+      roles,
+      accountStatus,
+    });
+    return res.status(200).json(user);
+  } catch (e) {
+    next(e);
+  }
+};
 
 const putUserById = () => {};
 
