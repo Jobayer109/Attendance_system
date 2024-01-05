@@ -13,7 +13,7 @@ const getUsers = async (req, res, next) => {
 
 // Get a single user by it's id.
 const getUserByID = async (req, res, next) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
 
   const user = await findUserByProperty("_id", userId);
   if (!user) {
@@ -47,7 +47,13 @@ const putUserById = () => {};
 
 const patchUserById = () => {};
 
-const deleteUserById = () => {};
+const deleteUserById = async (req, res, next) => {
+  const { userId } = req.params;
+
+  const user = await findUserByProperty("_id", userId);
+  await user.deleteOne();
+  return res.status(203).send();
+};
 
 module.exports = {
   getUsers,

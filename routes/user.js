@@ -18,6 +18,6 @@ router.put("/:userId", () => {});
 router.patch("/:userId", () => {});
 
 // Delete user by  ID
-router.delete("/:userId", () => {});
+router.delete("/:userId", userController.deleteUserById);
 
 module.exports = router;
