@@ -15,7 +15,7 @@ router.post("/", userController.postUser);
 router.put("/:userId", () => {});
 
 // Update single portion of info
-router.patch("/:userId", () => {});
+router.patch("/:userId", userController.patchUserById);
 
 // Delete user by  ID
 router.delete("/:userId", userController.deleteUserById);
